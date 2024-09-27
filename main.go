@@ -40,13 +40,18 @@ func writeToPlist(username, size string) error {
 // Function to clear the plist file before adding new data
 func clearPlist() error {
     plistLoc := "/Library/Management/ca.ecuad.macadmins.UserStorage.plist"
-    cmd := exec.Command("sudo", "defaults", "delete", plistLoc)
+    
+    // Check if the plist file exists
+    if _, err := os.Stat(plistLoc); os.IsNotExist(err) {
+        // If plist does not exist, no need to delete it
+        fmt.Println("Plist does not exist, nothing to clear")
+        return nil
+    }
 
+    // Run the defaults delete command
+    cmd := exec.Command("sudo", "defaults", "delete", plistLoc)
     if err := cmd.Run(); err != nil {
-        // Handle case where plist does not exist yet, which is fine
-        if !os.IsNotExist(err) {
-            return fmt.Errorf("failed to clear plist: %v", err)
-        }
+        return fmt.Errorf("failed to clear plist: %v", err)
     }
 
     return nil
